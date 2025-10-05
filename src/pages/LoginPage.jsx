@@ -112,7 +112,7 @@ const LoginPage = ({ onLogin }) => {
             </p>
           </div>
 
-          {/* Demo Credentials Info */}
+          {/* Demo Credentials Info
           {!showForgotPassword && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -128,7 +128,7 @@ const LoginPage = ({ onLogin }) => {
                 <p className="text-text-muted">Password: admin123</p>
               </div>
             </motion.div>
-          )}
+          )} */}
 
           {/* Login Form */}
           {!showForgotPassword ? (
