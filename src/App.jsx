@@ -10,7 +10,7 @@ import AllUsersPage from "./pages/AllUsersPage"
 import MasterPage from "./pages/MasterPage"
 import CounselorPage from "./pages/CounselorPage"
 import ReportsPage from "./pages/ReportsPage"
-import ReportsPage from "./pages/ReportsPage"
+import ResourcesPage from "./pages/ResourcesPage"
 
 function App() {
   const [showLanding, setShowLanding] = useState(true)
