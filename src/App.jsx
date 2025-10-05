@@ -9,7 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout"
 import AllUsersPage from "./pages/AllUsersPage"
 import MasterPage from "./pages/MasterPage"
 import CounselorPage from "./pages/CounselorPage"
-import ResourcesPage from "./pages/ResourcesPAge"
+import ReportsPage from "./pages/ReportsPage"
 import ReportsPage from "./pages/ReportsPage"
 
 function App() {
