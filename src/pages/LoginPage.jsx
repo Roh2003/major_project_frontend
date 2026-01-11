@@ -31,7 +31,7 @@ const LoginPage = ({ onLogin }) => {
         toast.success("Login successful! Welcome back.")
         onLogin("demo-auth-token-12345")
       } else {
-        toast.error("Invalid credentials. Try admin@skillup.com / admin123")
+        toast.error("Invalid credentials.")
       }
       setLoading(false)
     }, 1500)

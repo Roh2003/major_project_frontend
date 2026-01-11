@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Edit2, Trash2, Search, FileText, Video, ImageIcon, File, Download, Eye, Upload } from "lucide-react"
 import { motion } from "framer-motion"
 import Button from "../components/common/Button"
@@ -8,72 +8,38 @@ import Input from "../components/common/Input"
 import Modal from "../components/common/Modal"
 import Table from "../components/common/Table"
 import { toast } from "react-toastify"
+import { uploadToCloudinary } from "../utils/cloudnery"
+import resourceService from "../services/resource.service"
 
 const ResourcesPage = () => {
   const [showModal, setShowModal] = useState(false)
   const [editingResource, setEditingResource] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "document",
-    type: "pdf",
+    type: "",
     url: "",
     size: "",
     uploadedBy: "Admin",
   })
 
-  const [resources, setResources] = useState([
-    {
-      id: 1,
-      title: "JavaScript Fundamentals Guide",
-      description: "Complete guide to JavaScript basics",
-      category: "Document",
-      type: "PDF",
-      url: "/resources/js-guide.pdf",
-      size: "2.5 MB",
-      uploadedBy: "Admin",
-      downloads: 342,
-      uploadDate: "2025-01-15",
-    },
-    {
-      id: 2,
-      title: "React Tutorial Series",
-      description: "Video series on React development",
-      category: "Video",
-      type: "MP4",
-      url: "/resources/react-tutorial.mp4",
-      size: "125 MB",
-      uploadedBy: "Admin",
-      downloads: 189,
-      uploadDate: "2025-01-20",
-    },
-    {
-      id: 3,
-      title: "UI Design Patterns",
-      description: "Collection of modern UI patterns",
-      category: "Image",
-      type: "PNG",
-      url: "/resources/ui-patterns.png",
-      size: "5.8 MB",
-      uploadedBy: "Admin",
-      downloads: 256,
-      uploadDate: "2025-01-25",
-    },
-    {
-      id: 4,
-      title: "Python Cheat Sheet",
-      description: "Quick reference for Python syntax",
-      category: "Document",
-      type: "PDF",
-      url: "/resources/python-cheat.pdf",
-      size: "1.2 MB",
-      uploadedBy: "Admin",
-      downloads: 421,
-      uploadDate: "2025-02-01",
-    },
-  ])
+  const [resources, setResources] = useState([])
+  const [stats, setStats] = useState({
+    total: 0,
+    documents: 0,
+    videos: 0,
+    images: 0,
+    totalDownloads: 0,
+  })
+
+  // Ref to prevent duplicate API calls
+  const fetchingRef = useRef(false)
 
   const categories = [
     { value: "all", label: "All Resources", icon: File },
@@ -89,35 +55,163 @@ const ResourcesPage = () => {
     { key: "size", label: "Size" },
     { key: "uploadedBy", label: "Uploaded By" },
     { key: "downloads", label: "Downloads" },
-    { key: "uploadDate", label: "Upload Date" },
+    { 
+      key: "createdAt", 
+      label: "Upload Date",
+      render: (value) => new Date(value).toLocaleDateString()
+    },
   ]
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  // Fetch resources on component mount and when filters change
+  useEffect(() => {
+    fetchStats() // Only fetch stats once on mount
+  }, [])
 
-    if (editingResource) {
-      setResources(
-        resources.map((resource) => (resource.id === editingResource.id ? { ...formData, id: resource.id } : resource)),
-      )
-      toast.success("Resource updated successfully")
-    } else {
-      const newResource = {
-        ...formData,
-        id: resources.length + 1,
-        downloads: 0,
-        uploadDate: new Date().toISOString().split("T")[0],
-      }
-      setResources([...resources, newResource])
-      toast.success("Resource uploaded successfully")
+  const fetchResources = useCallback(async () => {
+    // Prevent duplicate calls
+    if (fetchingRef.current) {
+      console.log("Already fetching, skipping...")
+      return
     }
 
-    setShowModal(false)
-    setEditingResource(null)
+    try {
+      fetchingRef.current = true
+      setLoading(true)
+      const params = {}
+      
+      if (filterCategory !== "all") {
+        params.category = filterCategory
+      }
+      
+      if (searchQuery) {
+        params.search = searchQuery
+      }
+
+      const response = await resourceService.getAllResources(params)
+      setResources(response.data.data)
+      toast.success("Resources fetched successfully")
+
+    } catch (error) {
+      console.error("Fetch resources error:", error)
+      toast.error("Failed to fetch resources")
+    } finally {
+      setLoading(false)
+      fetchingRef.current = false
+    }
+  }, [filterCategory, searchQuery])
+
+  const fetchStats = async () => {
+    try {
+      const response = await resourceService.getResourceStats()
+      setStats(response.data.data)
+
+    } catch (error) {
+      console.error("Fetch stats error:", error)
+    }
+  }
+
+  // Refetch resources when search or filter changes (with debounce)
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchResources()
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [fetchResources])
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+      
+      // Auto-detect category and type
+      const fileType = file.type
+      let category = "other"
+      let type = file.name.split('.').pop().toUpperCase()
+      
+      if (fileType.startsWith("image/")) {
+        category = "image"
+      } else if (fileType.startsWith("video/")) {
+        category = "video"
+      } else {
+        category = "document"
+      }
+      
+      setFormData({
+        ...formData,
+        category,
+        type,
+        size: formatFileSize(file.size)
+      })
+    }
+  }
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      setUploading(true)
+      
+      let resourceData = { ...formData }
+
+      // Upload file to Cloudinary if a file is selected
+      if (selectedFile) {
+        toast.info("Uploading file to Cloudinary...")
+        const uploadResult = await uploadToCloudinary(selectedFile, "resources")
+        
+        resourceData.url = uploadResult.url
+        resourceData.size = uploadResult.size
+        resourceData.type = uploadResult.format.toUpperCase()
+      }
+
+      // Validate required fields
+      if (!resourceData.title || !resourceData.url) {
+        toast.error("Title and file are required")
+        return
+      }
+
+      let response
+      if (editingResource) {
+        response = await resourceService.updateResource(editingResource.id, resourceData)
+        toast.success("Resource updated successfully")
+        setResources(resources.map((r) => 
+          r.id === editingResource.id ? response.data.data : r
+        ))
+      } else {
+        response = await resourceService.createResource(resourceData)
+        toast.success("Resource uploaded successfully")
+        setResources([response.data.data, ...resources])
+      }
+
+      // Close modal and reset form
+      setShowModal(false)
+      setEditingResource(null)
+      setSelectedFile(null)
+      resetForm()
+      fetchStats() // Refresh stats
+
+    } catch (error) {
+      console.error("Submit error:", error)
+      toast.error(error.response?.data?.message || "Failed to save resource")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const resetForm = () => {
     setFormData({
       title: "",
       description: "",
       category: "document",
-      type: "pdf",
+      type: "",
       url: "",
       size: "",
       uploadedBy: "Admin",
@@ -126,54 +220,67 @@ const ResourcesPage = () => {
 
   const handleEdit = (resource) => {
     setEditingResource(resource)
-    setFormData(resource)
+    setFormData({
+      title: resource.title,
+      description: resource.description || "",
+      category: resource.category.toLowerCase(),
+      type: resource.type,
+      url: resource.url,
+      size: resource.size || "",
+      uploadedBy: resource.uploadedBy || "Admin",
+    })
+    setSelectedFile(null)
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this resource?")) {
-      setResources(resources.filter((resource) => resource.id !== id))
-      toast.success("Resource deleted successfully")
+      try {
+        const response = await resourceService.deleteResource(id)
+
+          setResources(resources.filter((resource) => resource.id !== id))
+          toast.success("Resource deleted successfully")
+          fetchStats() // Refresh stats
+
+      } catch (error) {
+        console.error("Delete error:", error)
+        toast.error("Failed to delete resource")
+      }
     }
   }
 
   const handleAdd = () => {
     setEditingResource(null)
-    setFormData({
-      title: "",
-      description: "",
-      category: "document",
-      type: "pdf",
-      url: "",
-      size: "",
-      uploadedBy: "Admin",
-    })
+    setSelectedFile(null)
+    resetForm()
     setShowModal(true)
   }
 
-  const handleDownload = (resource) => {
-    toast.success(`Downloading ${resource.title}...`)
-    setResources(resources.map((r) => (r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r)))
+  const handleDownload = async (resource) => {
+    try {
+      // Increment download count
+      await resourceService.incrementDownload(resource.id)
+      
+      // Open resource in new tab
+      window.open(resource.url, '_blank')
+      
+      toast.success(`Downloading ${resource.title}...`)
+      
+      // Update local state
+      setResources(resources.map((r) => 
+        r.id === resource.id ? { ...r, downloads: r.downloads + 1 } : r
+      ))
+      
+      fetchStats() // Refresh stats
+    } catch (error) {
+      console.error("Download error:", error)
+      toast.error("Failed to track download")
+    }
   }
 
   const handlePreview = (resource) => {
+    window.open(resource.url, '_blank')
     toast.info(`Opening preview for ${resource.title}`)
-  }
-
-  const filteredResources = resources.filter((resource) => {
-    const matchesSearch =
-      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = filterCategory === "all" || resource.category.toLowerCase() === filterCategory
-    return matchesSearch && matchesCategory
-  })
-
-  const stats = {
-    total: resources.length,
-    documents: resources.filter((r) => r.category === "Document").length,
-    videos: resources.filter((r) => r.category === "Video").length,
-    images: resources.filter((r) => r.category === "Image").length,
-    totalDownloads: resources.reduce((sum, r) => sum + r.downloads, 0),
   }
 
   return (
@@ -309,42 +416,48 @@ const ResourcesPage = () => {
       </div>
 
       {/* Resources Table */}
-      <Table
-        columns={columns}
-        data={filteredResources}
-        actions={(row) => (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePreview(row)}
-              className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
-              title="Preview"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleDownload(row)}
-              className="p-2 text-success hover:bg-success/10 rounded-lg transition-colors"
-              title="Download"
-            >
-              <Download className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleEdit(row)}
-              className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
-              title="Edit"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => handleDelete(row.id)}
-              className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
-              title="Delete"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      />
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-text-secondary">Loading resources...</p>
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          data={resources}
+          actions={(row) => (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePreview(row)}
+                className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
+                title="Preview"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDownload(row)}
+                className="p-2 text-success hover:bg-success/10 rounded-lg transition-colors"
+                title="Download"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleEdit(row)}
+                className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
+                title="Edit"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(row.id)}
+                className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        />
+      )}
 
       {/* Upload/Edit Resource Modal */}
       <Modal
@@ -352,6 +465,7 @@ const ResourcesPage = () => {
         onClose={() => {
           setShowModal(false)
           setEditingResource(null)
+          setSelectedFile(null)
         }}
         title={editingResource ? "Edit Resource" : "Upload New Resource"}
         size="lg"
@@ -373,7 +487,6 @@ const ResourcesPage = () => {
               placeholder="Enter resource description"
               rows={3}
               className="w-full px-4 py-2.5 bg-surface border border-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-              required
             />
           </div>
 
@@ -388,6 +501,7 @@ const ResourcesPage = () => {
                 <option value="document">Document</option>
                 <option value="video">Video</option>
                 <option value="image">Image</option>
+                <option value="other">Other</option>
               </select>
             </div>
 
@@ -396,42 +510,39 @@ const ResourcesPage = () => {
               placeholder="e.g., PDF, MP4, PNG"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              required
+              disabled={selectedFile !== null}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="File Size"
-              placeholder="e.g., 2.5 MB"
-              value={formData.size}
-              onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-              required
-            />
-
-            <Input
-              label="Uploaded By"
-              placeholder="Admin name"
-              value={formData.uploadedBy}
-              onChange={(e) => setFormData({ ...formData, uploadedBy: e.target.value })}
-              required
-            />
-          </div>
+          <Input
+            label="Uploaded By"
+            placeholder="Admin name"
+            value={formData.uploadedBy}
+            onChange={(e) => setFormData({ ...formData, uploadedBy: e.target.value })}
+          />
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-text-secondary">File URL or Upload</label>
+            <label className="block text-sm font-medium text-text-secondary">
+              Upload File {!editingResource && <span className="text-error">*</span>}
+            </label>
             <div className="flex gap-3">
-              <Input
-                placeholder="Enter file URL or upload file"
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                required
+              <input
+                type="file"
+                onChange={handleFileSelect}
+                className="flex-1 px-4 py-2.5 bg-surface border border-border rounded-lg text-text-primary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+                accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
               />
-              <Button type="button" variant="secondary" icon={Upload}>
-                Browse
-              </Button>
             </div>
-            <p className="text-xs text-text-muted">Enter a URL or click Browse to upload a file</p>
+            {selectedFile && (
+              <p className="text-xs text-success">
+                Selected: {selectedFile.name} ({formatFileSize(selectedFile.size)})
+              </p>
+            )}
+            {editingResource && !selectedFile && (
+              <p className="text-xs text-text-muted">
+                Leave empty to keep existing file
+              </p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -442,12 +553,14 @@ const ResourcesPage = () => {
               onClick={() => {
                 setShowModal(false)
                 setEditingResource(null)
+                setSelectedFile(null)
               }}
+              disabled={uploading}
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" fullWidth>
-              {editingResource ? "Update Resource" : "Upload Resource"}
+            <Button type="submit" variant="primary" fullWidth disabled={uploading}>
+              {uploading ? "Uploading..." : editingResource ? "Update Resource" : "Upload Resource"}
             </Button>
           </div>
         </form>

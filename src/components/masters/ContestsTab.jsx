@@ -1,86 +1,104 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Edit2, Trash2, Search } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Plus, Edit2, Trash2, Search, ListChecks } from "lucide-react"
 import Button from "../common/Button"
 import Input from "../common/Input"
 import Modal from "../common/Modal"
 import Table from "../common/Table"
 import { toast } from "react-toastify"
 
+// SERVICES (you will implement)
+import ContestService from "../../services/contest.sevice"
+import QuestionManager from "./QuestionManager"
+import contestService from "../../services/contest.sevice"
+
 const ContestsTab = () => {
   const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [showQuestionModal, setShowQuestionModal] = useState(false)
+  const [activeContestId, setActiveContestId] = useState(null)
+
   const [editingContest, setEditingContest] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
+
   const [formData, setFormData] = useState({
-    name: "",
-    duration: "",
+    title: "",
+    description: "",
+    category: "",
     startTime: "",
     endTime: "",
-    questions: "",
-    prize: "",
+    durationMinutes: "",
+    isPublished: false
   })
 
-  const [contests, setContests] = useState([
-    {
-      id: 1,
-      name: "JavaScript Challenge 2025",
-      duration: "2 hours",
-      startTime: "2025-02-15 10:00",
-      endTime: "2025-02-15 12:00",
-      questions: "20",
-      prize: "$500",
-      participants: 156,
-    },
-    {
-      id: 2,
-      name: "Python Coding Sprint",
-      duration: "3 hours",
-      startTime: "2025-02-20 14:00",
-      endTime: "2025-02-20 17:00",
-      questions: "15",
-      prize: "$750",
-      participants: 203,
-    },
-  ])
+  const [contests, setContests] = useState([])
 
   const columns = [
-    { key: "name", label: "Contest Name" },
-    { key: "duration", label: "Duration" },
-    { key: "startTime", label: "Start Time" },
-    { key: "endTime", label: "End Time" },
-    { key: "questions", label: "Questions" },
-    { key: "prize", label: "Prize" },
-    { key: "participants", label: "Participants" },
+    { key: "title", label: "Title" },
+    { key: "category", label: "Category" },
+    { key: "durationMinutes", label: "Duration (min)" },
+    {
+      key: "isPublished",
+      label: "Status",
+      render: (value) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            value
+              ? "bg-green-100 text-green-700"
+              : "bg-yellow-100 text-yellow-700"
+          }`}
+        >
+          {value ? "Published" : "Not Published"}
+        </span>
+      ),
+    },
   ]
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    loadContest()
+  }, [])
+
+  const loadContest = async () => {
+    try {
+      setLoading(true)
+      const data = await contestService.getContests()
+      setContests(data.data.data)
+    } catch {
+      toast.error("Failed to load contest")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (editingContest) {
-      setContests(
-        contests.map((contest) => (contest.id === editingContest.id ? { ...formData, id: contest.id } : contest)),
-      )
-      toast.success("Contest updated successfully")
-    } else {
-      const newContest = {
-        ...formData,
-        id: contests.length + 1,
-        participants: 0,
+    try {
+      if (editingContest) {
+        await ContestService.updateContest(editingContest.id, formData)
+        toast.success("Contest updated")
+      } else {
+        await ContestService.createContest(formData)
+        toast.success("Contest created")
       }
-      setContests([...contests, newContest])
-      toast.success("Contest created successfully")
+      setShowModal(false)
+      setEditingContest(null)
+      resetForm()
+    } catch {
+      toast.error("Operation failed")
     }
+  }
 
-    setShowModal(false)
-    setEditingContest(null)
+  const resetForm = () => {
     setFormData({
-      name: "",
-      duration: "",
+      title: "",
+      description: "",
+      category: "",
       startTime: "",
       endTime: "",
-      questions: "",
-      prize: "",
+      durationMinutes: "",
+      isPublished: false
     })
   }
 
@@ -90,30 +108,32 @@ const ContestsTab = () => {
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this contest?")) {
-      setContests(contests.filter((contest) => contest.id !== id))
-      toast.success("Contest deleted successfully")
-    }
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this contest?")) return
+    await ContestService.deleteContest(id)
+    toast.success("Contest deleted")
   }
 
   const handleAdd = () => {
     setEditingContest(null)
-    setFormData({
-      name: "",
-      duration: "",
-      startTime: "",
-      endTime: "",
-      questions: "",
-      prize: "",
-    })
+    resetForm()
     setShowModal(true)
   }
 
-  const filteredContests = contests.filter((contest) => contest.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredContests = Array.isArray(contests)
+    ? contests.filter((c) =>
+        typeof c.title === "string" &&
+        c.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
+  console.log("filteredcontest", filteredContests)
+  console.log("filteredcontest 1", contests)
 
   return (
     <div className="space-y-6">
+
+      {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <Input
           placeholder="Search contests..."
@@ -127,106 +147,178 @@ const ContestsTab = () => {
         </Button>
       </div>
 
+      {/* Contest Table */}
       <Table
-        columns={columns}
+        columns={[
+          ...columns,
+          {
+            key: "startTime",
+            label: "Start Time",
+            render: (value, row) => {
+              // If `row.startTime` is falsy, return "-"
+              if (!row.startTime) return "-";
+              // Parse date if possible
+              const local = new Date(row.startTime);
+              return isNaN(local.getTime())
+                ? row.startTime
+                : local.toLocaleString();
+            },
+          },
+          {
+            key: "endTime",
+            label: "End Time",
+            render: (value, row) => {
+              if (!row.endTime) return "-";
+              const local = new Date(row.endTime);
+              return isNaN(local.getTime())
+                ? row.endTime
+                : local.toLocaleString();
+            },
+          },
+        ]}
         data={filteredContests}
         actions={(row) => (
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleEdit(row)}
-              className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
-            >
-              <Edit2 className="w-4 h-4" />
+            <button onClick={() => handleEdit(row)} className="icon-btn">
+              <Edit2 size={16} />
             </button>
+
+            <button onClick={() => handleDelete(row.id)} className="icon-btn text-red-500">
+              <Trash2 size={16} />
+            </button>
+
             <button
-              onClick={() => handleDelete(row.id)}
-              className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
+              onClick={() => {
+                setActiveContestId(row.id)
+                setShowQuestionModal(true)
+              }}
+              className="icon-btn text-indigo-500"
+              title="Manage Questions"
             >
-              <Trash2 className="w-4 h-4" />
+              <ListChecks size={16} />
             </button>
           </div>
         )}
       />
 
+      {/* Contest Create / Edit Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false)
-          setEditingContest(null)
-        }}
-        title={editingContest ? "Edit Contest" : "Add New Contest"}
+        onClose={() => setShowModal(false)}
+        title={editingContest ? "Edit Contest" : "Create Contest"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <Input
-            label="Contest Name"
-            placeholder="Enter contest name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            label="Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
+          />
+
+          <Input
+            label="Category"
+            placeholder="Web / DSA / AI"
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            required
+          />
+
+          <textarea
+            placeholder="Contest description"
+            className="w-full px-4 py-2.5 border rounded-lg bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
+            rows={3}
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
           />
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Duration"
-              placeholder="e.g., 2 hours"
-              value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-              required
-            />
-
-            <Input
-              label="Number of Questions"
-              type="number"
-              placeholder="e.g., 20"
-              value={formData.questions}
-              onChange={(e) => setFormData({ ...formData, questions: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
+              type="datetime-local"
               label="Start Time"
-              type="datetime-local"
-              value={formData.startTime}
-              onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+              value={
+                formData.startTime
+                  ? new Date(formData.startTime).toISOString().slice(0, 16)
+                  : ""
+              }
+              onChange={(e) =>
+                setFormData({ ...formData, startTime: e.target.value })
+              }
               required
             />
 
             <Input
-              label="End Time"
               type="datetime-local"
-              value={formData.endTime}
-              onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+              label="End Time"
+              value={
+                formData.endTime
+                  ? new Date(formData.endTime).toISOString().slice(0, 16)
+                  : ""
+              }
+              onChange={(e) =>
+                setFormData({ ...formData, endTime: e.target.value })
+              }
               required
             />
           </div>
 
           <Input
-            label="Prize"
-            placeholder="e.g., $500"
-            value={formData.prize}
-            onChange={(e) => setFormData({ ...formData, prize: e.target.value })}
+            type="number"
+            label="Duration (minutes)"
+            value={formData.durationMinutes}
+            onChange={(e) =>
+              setFormData({ ...formData, durationMinutes: e.target.value })
+            }
             required
           />
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium" htmlFor="publish-toggle">
+                {formData.isPublished ? "Published" : "Draft"}
+              </label>
+              <button
+                type="button"
+                id="publish-toggle"
+                className={`w-12 h-6 rounded-full transition relative focus:outline-none ${
+                  formData.isPublished ? "bg-green-500" : "bg-gray-300"
+                }`}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    isPublished: !prev.isPublished,
+                  }))
+                }
+                aria-pressed={formData.isPublished}
+              >
+                <span
+                  className={`block w-6 h-6 bg-white rounded-full shadow transform transition ${
+                    formData.isPublished ? "translate-x-6" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
 
           <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="secondary"
-              fullWidth
-              onClick={() => {
-                setShowModal(false)
-                setEditingContest(null)
-              }}
-            >
+            <Button type="button" variant="secondary" fullWidth onClick={() => setShowModal(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" fullWidth>
-              {editingContest ? "Update Contest" : "Create Contest"}
+              {editingContest ? "Update" : "Create"}
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Question Manager Modal */}
+      <Modal
+        isOpen={showQuestionModal}
+        onClose={() => setShowQuestionModal(false)}
+        title="Manage Questions"
+        size="xl"
+      >
+        <QuestionManager contestId={activeContestId} />
       </Modal>
     </div>
   )

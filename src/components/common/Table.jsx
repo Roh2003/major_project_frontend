@@ -18,7 +18,7 @@ const Table = ({ columns, data, actions }) => {
                   {column.label}
                 </th>
               ))}
-              {actions && <th className="text-right py-4 px-6 text-sm font-semibold text-text-secondary">Actions</th>}
+              {actions && <th className="text-left py-4 px-6 text-sm font-semibold text-text-secondary">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -33,8 +33,11 @@ const Table = ({ columns, data, actions }) => {
                 <tr key={index} className="border-b border-border/50 hover:bg-surface-light transition-colors">
                   {columns.map((column) => (
                     <td key={column.key} className="py-4 px-6 text-sm text-text-primary">
-                      {row[column.key]}
+                      {column.render
+                        ? column.render(row[column.key], row)
+                        : row[column.key]}
                     </td>
+                  
                   ))}
                   {actions && <td className="py-4 px-6 text-right">{actions(row)}</td>}
                 </tr>
