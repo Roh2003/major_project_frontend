@@ -12,57 +12,57 @@ const API = axios.create({
 })
 
 // Request interceptor - Add auth token to requests
-// API.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("authToken")
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`
-//     }
-//     return config
-//   },
-//   (error) => {
-//     return Promise.reject(error)
-//   },
-// )
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("adminToken")
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  },
+)
 
 // // Response interceptor - Handle errors globally
-// API.interceptors.response.use(
-//   (response) => {
-//     return response
-//   },
-//   (error) => {
-//     if (error.response) {
-//       // Server responded with error status
-//       const { status, data } = error.response
+API.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    if (error.response) {
+      // Server responded with error status
+      const { status, data } = error.response
 
-//       switch (status) {
-//         case 401:
-//           toast.error("Unauthorized. Please login again.")
-//           localStorage.removeItem("authToken")
-//           window.location.href = "/login"
-//           break
-//         case 403:
-//           toast.error("Access forbidden.")
-//           break
-//         case 404:
-//           toast.error("Resource not found.")
-//           break
-//         case 500:
-//           toast.error("Server error. Please try again later.")
-//           break
-//         default:
-//           toast.error(data.message || "An error occurred.")
-//       }
-//     } else if (error.request) {
-//       // Request made but no response
-//       toast.error("Network error. Please check your connection.")
-//     } else {
-//       // Something else happened
-//       toast.error("An unexpected error occurred.")
-//     }
+      switch (status) {
+        case 401:
+          toast.error("Unauthorized. Please login again.")
+          localStorage.removeItem("authToken")
+          window.location.href = "/login"
+          break
+        case 403:
+          toast.error("Access forbidden.")
+          break
+        case 404:
+          toast.error("Resource not found.")
+          break
+        case 500:
+          toast.error("Server error. Please try again later.")
+          break
+        default:
+          toast.error(data.message || "An error occurred.")
+      }
+    } else if (error.request) {
+      // Request made but no response
+      toast.error("Network error. Please check your connection.")
+    } else {
+      // Something else happened
+      toast.error("An unexpected error occurred.")
+    }
 
-//     return Promise.reject(error)
-//   },
-// )
+    return Promise.reject(error)
+  },
+)
 
 export default API

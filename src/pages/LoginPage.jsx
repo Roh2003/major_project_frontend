@@ -6,6 +6,7 @@ import { GraduationCap, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react
 import { toast } from "react-toastify"
 import Button from "../components/common/Button"
 import Input from "../components/common/Input"
+import AdminService from "../services/admin.service"
 
 const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("")
@@ -24,17 +25,21 @@ const LoginPage = ({ onLogin }) => {
 
     setLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      // Demo credentials
-      if (email === "admin@skillup.com" && password === "admin123") {
-        toast.success("Login successful! Welcome back.")
-        onLogin("demo-auth-token-12345")
-      } else {
-        toast.error("Invalid credentials.")
-      }
+    try {
+      const response = await AdminService.adminLogin({ email, password })
+      const data = response.data
+      console.log("data", data)
+      localStorage.setItem('adminToken', data.data.accessToken)
+      localStorage.setItem('adminUser', JSON.stringify(data.data.user))
+        
+      toast.success(`Welcome back, ${data.data.user.firstName || 'Admin'}!`)
+      onLogin(data.data.accessToken)
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('Login failed. invalid Credentials.')
+    } finally {
       setLoading(false)
-    }, 1500)
+    }
   }
 
   const handleForgotPassword = (e) => {

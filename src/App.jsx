@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     // Check if user is already authenticated
-    const authToken = localStorage.getItem("authToken")
+    const authToken = localStorage.getItem("adminToken")
     if (authToken) {
       setIsAuthenticated(true)
       setShowLanding(false)
@@ -32,12 +32,14 @@ function App() {
   }, [])
 
   const handleLogin = (token) => {
-    localStorage.setItem("authToken", token)
+    localStorage.setItem("adminToken", token)
     setIsAuthenticated(true)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken")
+    localStorage.removeItem("adminToken")
+    localStorage.removeItem("adminUser")
+
     setIsAuthenticated(false)
   }
 
