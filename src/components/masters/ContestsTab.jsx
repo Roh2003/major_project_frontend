@@ -63,6 +63,7 @@ const ContestsTab = () => {
     try {
       setLoading(true)
       const data = await contestService.getContests()
+      console.log("data of contest", data)
       setContests(data.data.data)
     } catch {
       toast.error("Failed to load contest")

@@ -7,7 +7,7 @@ const contestService = {
     
     // Get all contests (admin)
     getContests() {
-        return API.get("/admin/contest/admin");
+        return API.get("/admin/contest");
     },
     
     // Create contest
@@ -27,7 +27,7 @@ const contestService = {
     
     // Get contest by ID (admin)
     getContestById(contestId) {
-        return API.get(`/admin/contest/admin/${contestId}`);
+        return API.get(`/admin/contest/${contestId}`);
     },
     
     // ========================================
