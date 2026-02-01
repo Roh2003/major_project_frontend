@@ -11,23 +11,28 @@ import MasterPage from "./pages/MasterPage"
 import CounselorPage from "./pages/CounselorPage"
 import ReportsPage from "./pages/ReportsPage"
 import ResourcesPage from "./pages/ResourcesPage"
+import TutorSignupPage from "./pages/TutorSignupPage"
+import TutorDashboardLayout from "./layouts/TutorDashboardLayout"
+import TutorCoursesPage from "./pages/tutor/TutorCoursesPage"
+import TutorEarningsPage from "./pages/tutor/TutorEarningsPage"
+import TutorCourseFormPage from "./pages/tutor/TutorCourseFormPage"
+import TutorLessonsPage from "./pages/tutor/TutorLessonsPage"
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isTutorAuthenticated, setIsTutorAuthenticated] = useState(false)
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const authToken = localStorage.getItem("adminToken")
-    if (authToken) {
+    // Check if admin is authenticated
+    const adminToken = localStorage.getItem("adminToken")
+    if (adminToken) {
       setIsAuthenticated(true)
-      setShowLanding(false)
-    } else {
-      // Show landing page for 3 seconds
-      const timer = setTimeout(() => {
-        setShowLanding(false)
-      }, 3000)
-      return () => clearTimeout(timer)
+    }
+    
+    // Check if tutor is authenticated
+    const tutorToken = localStorage.getItem("tutorToken")
+    if (tutorToken) {
+      setIsTutorAuthenticated(true)
     }
   }, [])
 
@@ -36,25 +41,45 @@ function App() {
     setIsAuthenticated(true)
   }
 
+  const handleTutorLogin = (token) => {
+    localStorage.setItem("tutorToken", token)
+    setIsTutorAuthenticated(true)
+    console.log(isTutorAuthenticated)
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("adminToken")
     localStorage.removeItem("adminUser")
-
     setIsAuthenticated(false)
   }
 
-  if (showLanding) {
-    return <LandingPage />
+  const handleTutorLogout = () => {
+    localStorage.removeItem("tutorToken")
+    localStorage.removeItem("tutorUser")
+    setIsTutorAuthenticated(false)
   }
 
   return (
     <>
       <Router>
         <Routes>
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Admin Login */}
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />}
           />
+
+          {/* Tutor login */ }
+
+          <Route
+          path="/login"
+          element={isTutorAuthenticated ? <Navigate to="/tutor/dashboard" /> : <LoginPage onLogin={handleTutorLogin} />} 
+          />
+          
+          {/* Admin Dashboard */}
           <Route
             path="/dashboard/*"
             element={
@@ -74,7 +99,33 @@ function App() {
               )
             }
           />
-          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+          
+          {/* Tutor Routes */}
+          <Route path="/tutor/signup" element={<TutorSignupPage />} />
+
+          {console.log(isTutorAuthenticated)}
+          
+          {/* Tutor Dashboard */}
+          <Route
+            path="/tutor/dashboard/*"
+            element={
+               
+                <TutorDashboardLayout onLogout={handleTutorLogout}>
+                  <Routes>
+                    <Route index element={<Navigate to="/tutor/dashboard/courses" replace />} />
+                    <Route path="courses" element={<TutorCoursesPage />} />
+                    <Route path="courses/add" element={<TutorCourseFormPage />} />
+                    <Route path="courses/edit/:courseId" element={<TutorCourseFormPage />} />
+                    <Route path="courses/:courseId/lessons" element={<TutorLessonsPage />} />
+                    <Route path="earnings" element={<TutorEarningsPage />} />
+                  </Routes>
+                </TutorDashboardLayout>
+              
+            }
+          />
+          
+          {/* Default Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
       <ToastContainer
@@ -87,7 +138,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
+        theme="light"
       />
     </>
   )

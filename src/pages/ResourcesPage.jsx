@@ -162,14 +162,18 @@ const ResourcesPage = () => {
       
       let resourceData = { ...formData }
 
+      console.log("Selected file:", resourceData)
+
       // Upload file to Cloudinary if a file is selected
       if (selectedFile) {
         toast.info("Uploading file to Cloudinary...")
         const uploadResult = await uploadToCloudinary(selectedFile, "resources")
+
+        console.log("Upload result:", uploadResult)
         
         resourceData.url = uploadResult.url
         resourceData.size = uploadResult.size
-        resourceData.type = uploadResult.format.toUpperCase()
+        // resourceData.type = uploadResult?.type?.toUpperCase()
       }
 
       // Validate required fields
@@ -177,6 +181,7 @@ const ResourcesPage = () => {
         toast.error("Title and file are required")
         return
       }
+      console.log("Resource data:", resourceData)
 
       let response
       if (editingResource) {
@@ -510,7 +515,6 @@ const ResourcesPage = () => {
               placeholder="e.g., PDF, MP4, PNG"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              disabled={selectedFile !== null}
             />
           </div>
 

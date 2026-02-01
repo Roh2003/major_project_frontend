@@ -14,7 +14,8 @@ const API = axios.create({
 // Request interceptor - Add auth token to requests
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("adminToken")
+    // Try admin token first, then tutor token
+    const token = localStorage.getItem("adminToken") || localStorage.getItem("tutorToken")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }

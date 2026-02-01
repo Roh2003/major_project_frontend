@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react"
 const Input = ({
   label,
   type = "text",
+  name,
   placeholder,
   value,
   onChange,
@@ -38,6 +39,7 @@ const Input = ({
 
         <input
           type={inputType}
+          name={name}
           value={value}
           onChange={onChange}
           placeholder={placeholder}

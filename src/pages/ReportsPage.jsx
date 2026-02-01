@@ -47,10 +47,10 @@ const ReportsPage = () => {
   ]
 
   const categoryDistribution = [
-    { name: "Programming", value: 45, color: "#6366f1" },
-    { name: "Design", value: 25, color: "#10b981" },
-    { name: "Business", value: 15, color: "#f59e0b" },
-    { name: "Marketing", value: 15, color: "#ec4899" },
+    { name: "Programming", value: 45, color: "#10B981" },  // Primary green
+    { name: "Design", value: 25, color: "#3B82F6" },       // Secondary blue
+    { name: "Business", value: 15, color: "#F59E0B" },      // Accent amber
+    { name: "Marketing", value: 15, color: "#EC4899" },     // Pink
   ]
 
   const revenueData = [
@@ -184,20 +184,21 @@ const ReportsPage = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={enrollmentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-              <XAxis dataKey="month" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="month" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
               <Legend />
-              <Line type="monotone" dataKey="enrollments" stroke="#6366f1" strokeWidth={3} name="Enrollments" />
-              <Line type="monotone" dataKey="completions" stroke="#10b981" strokeWidth={3} name="Completions" />
+              <Line type="monotone" dataKey="enrollments" stroke="#10B981" strokeWidth={3} name="Enrollments" />
+              <Line type="monotone" dataKey="completions" stroke="#3B82F6" strokeWidth={3} name="Completions" />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>
@@ -232,10 +233,11 @@ const ReportsPage = () => {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
             </PieChart>
@@ -261,20 +263,21 @@ const ReportsPage = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={coursePerformanceData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-              <XAxis dataKey="course" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="course" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
               <Legend />
-              <Bar dataKey="students" fill="#6366f1" radius={[8, 8, 0, 0]} name="Students" />
-              <Bar dataKey="completion" fill="#10b981" radius={[8, 8, 0, 0]} name="Completion %" />
+              <Bar dataKey="students" fill="#10B981" radius={[8, 8, 0, 0]} name="Students" />
+              <Bar dataKey="completion" fill="#3B82F6" radius={[8, 8, 0, 0]} name="Completion %" />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -295,19 +298,20 @@ const ReportsPage = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-              <XAxis dataKey="month" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="month" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
                 formatter={(value) => `$${value.toLocaleString()}`}
               />
-              <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="revenue" fill="#10B981" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>

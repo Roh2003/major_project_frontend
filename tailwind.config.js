@@ -8,25 +8,42 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#6366f1',
-          dark: '#4f46e5',
-          light: '#818cf8',
+          DEFAULT: '#10B981', // Emerald 500 - matches mobile
+          dark: '#059669',    // Emerald 600
+          light: '#34D399',   // Emerald 400
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#34D399',
+          500: '#10B981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065F46',
+          900: '#064E3B',
+        },
+        secondary: {
+          DEFAULT: '#3B82F6', // Blue 500 - matches mobile
+          dark: '#2563EB',    // Blue 600
+          light: '#60A5FA',   // Blue 400
         },
         accent: {
-          DEFAULT: '#10b981',
-          dark: '#059669',
+          DEFAULT: '#F59E0B', // Amber 500 - matches mobile
+          dark: '#D97706',    // Amber 600
+          light: '#FCD34D',   // Amber 300
         },
-        background: '#0f172a',
-        surface: '#1e293b',
-        'surface-light': '#334155',
-        border: '#475569',
-        'text-primary': '#f1f5f9',
-        'text-secondary': '#cbd5e1',
-        'text-muted': '#94a3b8',
-        success: '#10b981',
-        warning: '#f59e0b',
-        error: '#ef4444',
-        info: '#3b82f6',
+        background: '#FFFFFF',      // White background - LIGHT THEME
+        surface: '#F9FAFB',        // Light gray surface - matches mobile
+        'surface-light': '#FFFFFF', // White for cards
+        'surface-hover': '#F3F4F6', // Subtle hover
+        border: '#E5E7EB',         // Light border - matches mobile
+        'text-primary': '#111827',  // Dark text - LIGHT THEME
+        'text-secondary': '#6B7280',// Gray text - matches mobile
+        'text-muted': '#9CA3AF',    // Muted text - matches mobile
+        success: '#10B981',     // Emerald 500
+        warning: '#F59E0B',     // Amber 500
+        error: '#EF4444',       // Red 500
+        info: '#3B82F6',        // Blue 500
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

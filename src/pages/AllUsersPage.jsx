@@ -44,9 +44,9 @@ const AllUsersPage = () => {
   ]
 
   const userActivityData = [
-    { name: "Active", value: 8932, color: "#10b981" },
+    { name: "Active", value: 8932, color: "#10B981" },  // Primary green
     { name: "Inactive", value: 2526, color: "#475569" },
-    { name: "New", value: 1000, color: "#6366f1" },
+    { name: "New", value: 1000, color: "#3B82F6" },      // Secondary blue
   ]
 
   const registrationData = [
@@ -153,20 +153,21 @@ const AllUsersPage = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={userGrowthData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-              <XAxis dataKey="month" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+              <XAxis dataKey="month" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
               <Legend />
-              <Line type="monotone" dataKey="users" stroke="#6366f1" strokeWidth={3} name="Total Users" />
-              <Line type="monotone" dataKey="active" stroke="#10b981" strokeWidth={3} name="Active Users" />
+              <Line type="monotone" dataKey="users" stroke="#10B981" strokeWidth={3} name="Total Users" />
+              <Line type="monotone" dataKey="active" stroke="#3B82F6" strokeWidth={3} name="Active Users" />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>
@@ -201,10 +202,11 @@ const AllUsersPage = () => {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1e293b",
-                  border: "1px solid #475569",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #E5E7EB",
                   borderRadius: "8px",
-                  color: "#f1f5f9",
+                  color: "#111827",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
             </PieChart>
@@ -228,18 +230,19 @@ const AllUsersPage = () => {
 
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={registrationData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-            <XAxis dataKey="day" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <XAxis dataKey="day" stroke="#6B7280" />
+            <YAxis stroke="#6B7280" />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #475569",
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
                 borderRadius: "8px",
-                color: "#f1f5f9",
+                color: "#111827",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               }}
             />
-            <Bar dataKey="registrations" fill="#6366f1" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="registrations" fill="#10B981" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </motion.div>
