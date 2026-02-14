@@ -13,6 +13,18 @@ import ContestService from "../../services/contest.sevice"
 import QuestionManager from "./QuestionManager"
 import contestService from "../../services/contest.sevice"
 
+// Helper to format a Date as local "YYYY-MM-DDTHH:mm" for datetime-local inputs
+const toLocalDateTimeString = (dateStr) => {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 const ContestsTab = () => {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -241,11 +253,11 @@ const ContestsTab = () => {
               label="Start Time"
               value={
                 formData.startTime
-                  ? new Date(formData.startTime).toISOString().slice(0, 16)
+                  ? toLocalDateTimeString(formData.startTime)
                   : ""
               }
               onChange={(e) =>
-                setFormData({ ...formData, startTime: e.target.value })
+                setFormData({ ...formData, startTime: new Date(e.target.value).toISOString() })
               }
               required
             />
@@ -255,11 +267,11 @@ const ContestsTab = () => {
               label="End Time"
               value={
                 formData.endTime
-                  ? new Date(formData.endTime).toISOString().slice(0, 16)
+                  ? toLocalDateTimeString(formData.endTime)
                   : ""
               }
               onChange={(e) =>
-                setFormData({ ...formData, endTime: e.target.value })
+                setFormData({ ...formData, endTime: new Date(e.target.value).toISOString() })
               }
               required
             />
