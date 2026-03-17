@@ -38,7 +38,7 @@ const LoginPage = ({ onLogin, onTutorLogin }) => {
         localStorage.setItem('tutorUser', JSON.stringify(data.data.tutor))
         
         toast.success(`Welcome back, ${data.data.tutor.firstName || 'Tutor'}!`)
-        onTutorLogin(data.data.authToken)
+        // onTutorLogin(data.data.authToken)
         navigate('/tutor/dashboard')
       } else {
         // Admin Login
