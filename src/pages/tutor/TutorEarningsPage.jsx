@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { DollarSign, TrendingUp, Clock, CheckCircle, Download } from "lucide-react"
+import { IndianRupee, TrendingUp, Clock, CheckCircle, Download } from "lucide-react"
 import { toast } from "react-toastify"
 import Button from "../../components/common/Button"
 import TutorService from "../../services/tutor.service"
@@ -68,12 +68,12 @@ const TutorEarningsPage = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-success/20 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-success" />
+              <IndianRupee className="w-6 h-6 text-success" />
             </div>
             <CheckCircle className="w-5 h-5 text-success" />
           </div>
           <p className="text-sm text-text-muted mb-1">Total Earnings</p>
-          <p className="text-3xl font-bold text-text-primary mb-2">${totalEarnings.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-text-primary mb-2">₹{totalEarnings.toFixed(2)}</p>
           <p className="text-xs text-success">All-time revenue</p>
         </motion.div>
 
@@ -90,7 +90,7 @@ const TutorEarningsPage = () => {
             <Clock className="w-5 h-5 text-warning" />
           </div>
           <p className="text-sm text-text-muted mb-1">Pending Earnings</p>
-          <p className="text-3xl font-bold text-text-primary mb-2">${pendingEarnings.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-text-primary mb-2">₹{pendingEarnings.toFixed(2)}</p>
           <p className="text-xs text-warning">Awaiting payout</p>
         </motion.div>
 
@@ -108,7 +108,7 @@ const TutorEarningsPage = () => {
           </div>
           <p className="text-sm text-text-muted mb-1">Average per Course</p>
           <p className="text-3xl font-bold text-text-primary mb-2">
-            ${coursesCount > 0 ? (totalEarnings / coursesCount).toFixed(2) : "0.00"}
+            ₹{coursesCount > 0 ? (totalEarnings / coursesCount).toFixed(2) : "0.00"}
           </p>
           <p className="text-xs text-secondary">Based on {coursesCount} courses</p>
         </motion.div>
@@ -136,7 +136,7 @@ const TutorEarningsPage = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-success">$0.00</p>
+                    <p className="font-semibold text-success">₹0.00</p>
                     <p className="text-xs text-text-muted">0 enrollments</p>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ const TutorEarningsPage = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <DollarSign className="w-12 h-12 text-text-muted mx-auto mb-3" />
+              <IndianRupee className="w-12 h-12 text-text-muted mx-auto mb-3" />
               <p className="text-text-muted">No courses uploaded yet</p>
             </div>
           )}
@@ -187,7 +187,7 @@ const TutorEarningsPage = () => {
           </div>
           <div>
             <p className="text-sm text-text-muted mb-2">Minimum Payout</p>
-            <p className="text-text-primary font-medium">$50.00</p>
+            <p className="text-text-primary font-medium">₹50.00</p>
           </div>
           <div>
             <p className="text-sm text-text-muted mb-2">Next Payout Date</p>

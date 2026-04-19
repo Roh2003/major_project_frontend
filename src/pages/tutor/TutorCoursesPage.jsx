@@ -189,7 +189,7 @@ const TutorCoursesPage = () => {
                                             </div>
                                         </td>
                                         <td className="py-4 px-6">
-                                            <span className="font-semibold text-text-primary">${course.price}</span>
+                                            <span className="font-semibold text-text-primary">₹{course.price}</span>
                                         </td>
                                         <td className="py-4 px-6">
                                             <span className="px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-medium">

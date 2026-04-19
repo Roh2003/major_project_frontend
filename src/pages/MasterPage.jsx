@@ -10,7 +10,6 @@ const MasterPage = () => {
     { path: "courses", label: "Courses" },
     { path: "contests", label: "Contests" },
     { path: "challenges", label: "Challenges" },
-    { path: "roadmaps", label: "Learning Roadmaps" },
   ]
 
   return (

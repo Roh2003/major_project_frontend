@@ -158,7 +158,7 @@ const ReportsPage = () => {
         />
         <StatCard
           title="Total Revenue"
-          value="$121.3K"
+          value="₹121.3K"
           icon={TrendingUp}
           trend={24.8}
           trendLabel="vs last period"
@@ -309,7 +309,7 @@ const ReportsPage = () => {
                   color: "#111827",
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
-                formatter={(value) => `$${value.toLocaleString()}`}
+                formatter={(value) => `₹${value.toLocaleString()}`}
               />
               <Bar dataKey="revenue" fill="#10B981" radius={[8, 8, 0, 0]} />
             </BarChart>
@@ -354,7 +354,7 @@ const ReportsPage = () => {
                   completions: 356,
                   rate: 78,
                   rating: 4.5,
-                  revenue: "$45,144",
+                  revenue: "₹45,144",
                 },
                 {
                   name: "Data Science with Python",
@@ -362,7 +362,7 @@ const ReportsPage = () => {
                   completions: 269,
                   rate: 82,
                   rating: 4.7,
-                  revenue: "$42,312",
+                  revenue: "₹42,312",
                 },
                 {
                   name: "Mobile App Development",
@@ -370,7 +370,7 @@ const ReportsPage = () => {
                   completions: 205,
                   rate: 71,
                   rating: 4.3,
-                  revenue: "$28,900",
+                  revenue: "₹28,900",
                 },
                 {
                   name: "UI/UX Design Masterclass",
@@ -378,7 +378,7 @@ const ReportsPage = () => {
                   completions: 199,
                   rate: 85,
                   rating: 4.8,
-                  revenue: "$34,866",
+                  revenue: "₹34,866",
                 },
                 {
                   name: "Cloud Computing Essentials",
@@ -386,7 +386,7 @@ const ReportsPage = () => {
                   completions: 135,
                   rate: 68,
                   rating: 4.2,
-                  revenue: "$19,800",
+                  revenue: "₹19,800",
                 },
               ].map((course, index) => (
                 <tr key={index} className="border-b border-border/50 hover:bg-surface-light transition-colors">
@@ -446,7 +446,7 @@ const ReportsPage = () => {
           className="bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 rounded-xl p-6"
         >
           <h4 className="text-sm font-medium text-text-muted mb-2">Revenue Per Student</h4>
-          <p className="text-3xl font-bold text-text-primary mb-1">$99.35</p>
+          <p className="text-3xl font-bold text-text-primary mb-1">₹99.35</p>
           <p className="text-sm text-success">+12.8% from last period</p>
         </motion.div>
       </div>

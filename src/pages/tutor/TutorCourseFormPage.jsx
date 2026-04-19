@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import Button from "../../components/common/Button"
 import Input from "../../components/common/Input"
 import CourseService from "../../services/course.service"
+import { uploadToCloudinary } from "../../utils/cloudnery"
 
 const TutorCourseFormPage = () => {
   const navigate = useNavigate()
@@ -25,6 +26,7 @@ const TutorCourseFormPage = () => {
   })
   
   const [loading, setLoading] = useState(false)
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
 
   const handleChange = (e) => {
     setFormData({
@@ -60,6 +62,25 @@ const TutorCourseFormPage = () => {
       toast.error("Failed to create course")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleThumbnailUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingThumbnail(true)
+    try {
+      const uploaded = await uploadToCloudinary(file, "courses/thumbnails")
+      setFormData((prev) => ({
+        ...prev,
+        thumbnailUrl: uploaded.url,
+      }))
+      toast.success("Thumbnail uploaded")
+    } catch (error) {
+      console.error("Thumbnail upload failed:", error)
+    } finally {
+      setUploadingThumbnail(false)
     }
   }
 
@@ -118,7 +139,7 @@ const TutorCourseFormPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Price (USD)"
+                  label="Price (INR)"
                   type="number"
                   name="price"
                   placeholder="0.00"
@@ -178,14 +199,33 @@ const TutorCourseFormPage = () => {
                 </div>
               </div>
 
-              <Input
-                label="Thumbnail URL"
-                type="url"
-                name="thumbnailUrl"
-                placeholder="https://example.com/image.jpg"
-                value={formData.thumbnailUrl}
-                onChange={handleChange}
-              />
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Thumbnail Image
+                </label>
+                <label className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface border border-border rounded-lg cursor-pointer hover:bg-surface/80 transition-all">
+                  <Upload className="w-4 h-4" />
+                  <span className="text-sm text-text-secondary">
+                    {uploadingThumbnail ? "Uploading..." : "Upload thumbnail"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleThumbnailUpload}
+                    className="hidden"
+                    disabled={uploadingThumbnail}
+                  />
+                </label>
+
+                {formData.thumbnailUrl && (
+                  <img
+                    src={formData.thumbnailUrl}
+                    alt="Thumbnail preview"
+                    className="mt-2 h-40 rounded-lg object-contain"
+                    style={{ width: "200px" }}
+                  />
+                )}
+              </div>
 
               <Input
                 label="Instructor Name"
@@ -210,7 +250,7 @@ const TutorCourseFormPage = () => {
             <Button
               type="submit"
               variant="primary"
-              loading={loading}
+              loading={loading || uploadingThumbnail}
               icon={Save}
             >
               Create Course
