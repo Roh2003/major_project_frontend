@@ -12,12 +12,24 @@ const contestService = {
     
     // Create contest
     createContest(payload = {}) {
-        return API.post("/admin/contest", payload);
+        return API.post("/admin/contest", {
+            ...payload,
+            durationMinutes: Number(payload.durationMinutes || 0),
+            firstRankCredits: Number(payload.firstRankCredits || 0),
+            secondRankCredits: Number(payload.secondRankCredits || 0),
+            thirdRankCredits: Number(payload.thirdRankCredits || 0),
+        });
     },
     
     // Update contest
     updateContest(contestId, payload = {}) {
-        return API.put(`/admin/contest/${contestId}`, payload);
+        return API.put(`/admin/contest/${contestId}`, {
+            ...payload,
+            durationMinutes: Number(payload.durationMinutes || 0),
+            firstRankCredits: Number(payload.firstRankCredits || 0),
+            secondRankCredits: Number(payload.secondRankCredits || 0),
+            thirdRankCredits: Number(payload.thirdRankCredits || 0),
+        });
     },
     
     // Publish/Unpublish contest

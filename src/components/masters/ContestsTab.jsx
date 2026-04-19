@@ -41,6 +41,9 @@ const ContestsTab = () => {
     startTime: "",
     endTime: "",
     durationMinutes: "",
+    firstRankCredits: "",
+    secondRankCredits: "",
+    thirdRankCredits: "",
     isPublished: false
   })
 
@@ -50,6 +53,11 @@ const ContestsTab = () => {
     { key: "title", label: "Title" },
     { key: "category", label: "Category" },
     { key: "durationMinutes", label: "Duration (min)" },
+    {
+      key: "rankRewards",
+      label: "Rewards (1/2/3)",
+      render: (_, row) => `${row.firstRankCredits || 0}/${row.secondRankCredits || 0}/${row.thirdRankCredits || 0}`,
+    },
     {
       key: "isPublished",
       label: "Status",
@@ -100,6 +108,8 @@ const ContestsTab = () => {
       resetForm()
     } catch {
       toast.error("Operation failed")
+    } finally {
+      loadContest()
     }
   }
 
@@ -111,6 +121,9 @@ const ContestsTab = () => {
       startTime: "",
       endTime: "",
       durationMinutes: "",
+      firstRankCredits: "",
+      secondRankCredits: "",
+      thirdRankCredits: "",
       isPublished: false
     })
   }
@@ -286,6 +299,36 @@ const ContestsTab = () => {
             }
             required
           />
+
+          <div className="grid grid-cols-3 gap-4">
+            <Input
+              type="number"
+              label="1st Rank Credits"
+              value={formData.firstRankCredits}
+              onChange={(e) =>
+                setFormData({ ...formData, firstRankCredits: e.target.value })
+              }
+              required
+            />
+            <Input
+              type="number"
+              label="2nd Rank Credits"
+              value={formData.secondRankCredits}
+              onChange={(e) =>
+                setFormData({ ...formData, secondRankCredits: e.target.value })
+              }
+              required
+            />
+            <Input
+              type="number"
+              label="3rd Rank Credits"
+              value={formData.thirdRankCredits}
+              onChange={(e) =>
+                setFormData({ ...formData, thirdRankCredits: e.target.value })
+              }
+              required
+            />
+          </div>
 
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium" htmlFor="publish-toggle">
